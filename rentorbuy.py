@@ -11,9 +11,9 @@ import altair as alt
 st.markdown("<h1 style='color: #F39373; padding-bottom: 30px;'>🏠 Rent vs. Buy Calculator</h1>", unsafe_allow_html=True)
 st.markdown("""
     <div style='background-color: #F8F6F4; padding: 10px; border-radius: 5px;'>
-        <p style='color: #000000; font-size: 16px; font-weight: bold;'>Welcome to Sherry's simplified Rent vs. Buy calculator</p>
+        <p style='color: #000000; font-size: 16px; font-weight: bold;'>Welcome to Sherry's no-frills Rent vs. Buy calculator</p>
         <p style='color: #000000;'>
-            Use this tool to figure out the total costs, including opportunity costs, between renting and buying property. Easy to input, easy to calculate. No numbers crunching or giant spreadsheet templates necessary.<br><br>
+            Use this FREE tool to figure out the total costs, including opportunity costs, between renting and buying property. Easy to input, easy to calculate. No numbers crunching or giant spreadsheet templates necessary.<br><br>
             You can calculate through two ways:
             <br>1. Simply upload your CSV file with the necessary data OR
             <br>2. Input the necessary data yourself</br></br>
@@ -21,6 +21,8 @@ st.markdown("""
             "
             <br><br>
             For any questions or feedback, don't hesitate to reach out to sherry@peek.money!
+            <br><br>
+            This product was created by Sherry from the Peek team. If you like what you see, and want more of it, check out <a href='https://peek.money' target='_blank'>peek.money</a>!
     </div>
 """, unsafe_allow_html=True)
 
