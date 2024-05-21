@@ -17,8 +17,7 @@ st.markdown("""
             You can calculate through two ways:
             <br>1. Simply upload your CSV file with the necessary data OR
             <br>2. Input the necessary data yourself</br></br>
-            For CSV uploads, please make sure that the columns are labeled with the exact wording of the inputs below: "Home Price," "Monthly Rent," "Stay Duration," "Mortgage Rate," "Down Payment," "Mortgage Term.
-            "
+            For CSV uploads, please make sure that the columns are labeled with the exact wording of the inputs below: "Home Price," "Monthly Rent," "Stay Duration," "Mortgage Rate," "Down Payment," "Mortgage Term."
             <br><br>
             For any questions or feedback, don't hesitate to reach out to sherry@peek.money!
             <br><br>
@@ -30,6 +29,18 @@ st.markdown("""
 #Upload CSV File
 st.markdown("<hr>", unsafe_allow_html=True)
 st.markdown("<h3 style='color: #F39373;'>Upload a CSV file</h3>", unsafe_allow_html=True)
+
+# Sample CSV download link
+sample_csv = """
+Home Price,Monthly Rent,Stay Duration,Mortgage Rate,Down Payment,Mortgage Term
+500000,2000,10,3.5,20,30
+"""
+st.download_button(
+    label="Download Sample CSV",
+    data=sample_csv,
+    file_name='sample_rent_vs_buy.csv',
+    mime='text/csv'
+)
 
 uploaded_file = st.file_uploader("", type=["csv"])
 
@@ -134,9 +145,7 @@ st.markdown("""
 After uploading or manually entering your details, feel free to tap each of the buttons below to calculate your results.
 
 - **Calculate Decision**: Calculate total rent vs. buy costs, including opportunity cost
-- **Calculate Cash Flow**: See the liquid cash flows out for each decision
 - **Mortgage Rate - Breakeven**: See the mortgage % that you need in order for renting and buying to cost the same
-- **Calculate Opportunity Cost Details**: Breakdown of how each year's costs contribute to overall opportunity cost. Keeping in mind the power of compounding.
 """, unsafe_allow_html=True)
 st.markdown("<div style='padding-bottom: 30px;'></div>", unsafe_allow_html=True)
 
