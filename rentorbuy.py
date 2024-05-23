@@ -2,7 +2,6 @@
 import streamlit as st
 import matplotlib.pyplot as plt
 import numpy as np  # Added this line
-import seaborn as sns
 import pandas as pd
 import altair as alt
 
@@ -118,14 +117,13 @@ else:
     with col3:
         stay_duration = int(st.number_input("Stay Duration (years)", value=30, key="stay_duration", format="%d", help="Enter the stay duration in years"))
     with col4:
-        mortgage_rate = st.number_input("Mortgage Rate (%)", value=4, key="mortgage_rate", format="%d", help="Enter the mortgage rate in percentage") / 100
+        mortgage_rate = st.number_input("Mortgage Rate (%)", value=4.0, key="mortgage_rate", format="%.1f", help="Enter the mortgage rate in percentage", step=0.1) / 100
     
     col5, col6 = st.columns(2)
     with col5:
         down_payment = st.number_input("Down Payment (%)", value=25, key="down_payment", format="%d", help="Enter the down payment in percentage") / 100
     with col6:
         mortgage_term = int(st.number_input("Mortgage Term (years)", value=30, key="mortgage_term", format="%d", help="Enter the mortgage term in years"))
-
 
 # Constants
 with st.expander("Adjust Other Default Assumptions", expanded=False):
