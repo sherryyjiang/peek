@@ -5,42 +5,49 @@ import streamlit as st
 st.markdown("<h1 style='color: #F39373; padding-bottom: 30px;'>🔥 FIRE (Financial Independence, Retire Early) Calculator</h1>", unsafe_allow_html=True)
 st.markdown("""
     <div style='background-color: #F8F6F4; padding: 10px; border-radius: 5px; margin-bottom: 40px;'>
-        <p style='color: #000000; font-size: 16px; font-weight: bold;'>Welcome to the FIRE Calculator</p>
+        <p style='color: #000000; font-size: 16px; font-weight: bold;'>Welcome to Sherry's FIRE Calculator</p>
         <p style='color: #000000;'>
             Use this tool to estimate how much you need to save to achieve financial independence and retire early. Simply input your annual expenses, current savings, expected annual return on investments, annual income, and savings rate.
-        </p>
+            <br><br>
+            There are many other FIRE calculators out there, but what makes this one a bit different is it gives you:
+            <br>
+            a) More granular options for specific asset classes
+            <br>
+            b) FREE simulation of potential outcomes (using Monte Carlo method)
+            <br>
+            c) Better lens for the "Barbell FIRE" method
+            <br><br>
+            What is Barbell FIRE?
+            <br><br>
+            Many people know what FIRE, CoastFIRE, FatFIRE, BaristaFIRE, and the other FIRE methods. But there is also one I call Barbell FIRE which employs the barbell method around investing in general.
+            <br><br>
+            Barbell FIRE says it's actually fine to take some risk to gain potential upside while still protecting your downside. This is by constructing your portfolio in terms of both stable assets (ETFs, bonds, etc.) and growth assets (e.g., individual tech stocks, crypto, angel investing). In the best case top 10-20% scenarios, you might be able to reach your goal sooner. But in the bottom 10% of the scenarios, you still are doing okay because you still have stable assets that ground your portfolio.
+            <br><br>
+            For any questions or feedback, don't hesitate to reach out to sherry@peek.money!
+            <br><br>
+            This product was created by Sherry from the Peek team. If you like what you see, and want more of it, check out peek.money!
     </div>
 """, unsafe_allow_html=True)
+st.markdown("<hr style='border:1px solid #F39373;'>", unsafe_allow_html=True)
 
 # Streamlit: Input fields
+st.markdown("<h2 style='color: #F39373; padding-bottom: 40px;'>Basic Inputs</h2>", unsafe_allow_html=True)
 col1, col2 = st.columns(2)
 with col1:
     age = st.number_input("Current Age", min_value=0.0, value=32.0, step=0.1, format="%.1f")
+    annual_expenses = st.number_input("Annual Expenses at Retirement ($)", min_value=0, value=100000, step=1000)
+    current_savings = st.number_input("Current Savings ($)", min_value=0, value=1000000, step=1000)
+    annual_income = st.number_input("Annual Income ($) - assumed 3% growth rate", min_value=0, value=90000, step=1000)
 with col2:
     desired_fire_age = st.number_input("Desired FIRE Age", min_value=0.0, value=50.0, step=0.1, format="%.1f")
-
-col3, col4 = st.columns(2)
-with col3:
-    annual_expenses = st.number_input("Annual Expenses at Retirement ($)", min_value=0, value=100000, step=1000)
-with col4:
-    current_savings = st.number_input("Current Savings ($)", min_value=0, value=1000000, step=1000)
-
-col5, col6 = st.columns(2)
-with col5:
-    annual_return = st.number_input("Expected Annual Return on Investments (%)", min_value=0.0, value=9.0, step=0.1)
-with col6:
-    annual_income = st.number_input("Annual Income ($) - assumed 3% growth rate", min_value=0, value=90000, step=1000)
-
-col7, col8 = st.columns(2)
-with col7:
     savings_rate = st.number_input("Savings Rate (%)", min_value=0.0, value=30.0, step=0.1)
-with col8:
     inflation_rate = st.number_input("Inflation Rate (%)", min_value=0.0, value=3.0, step=0.1)
+    
 
+st.markdown("<hr style='border:1px solid #F39373;'>", unsafe_allow_html=True)
 
 # Streamlit: Advanced options for Expected Annual Return on Investments (%)
-st.markdown("<h2 style='color: #F39373;'>Advanced Options for Expected Annual Return on Investments (%)</h2>", unsafe_allow_html=True)
-
+st.markdown("<h2 style='color: #F39373; padding-bottom: 40px;'>Expected Annual Return on Investments (%)</h2>", unsafe_allow_html=True)
 col9, col10 = st.columns(2)
 with col9:
     equities_percentage = st.number_input("% of Equities", min_value=0.0, max_value=100.0, value=70.0, step=0.1)
@@ -55,18 +62,19 @@ with col10:
     alternatives_percentage = st.number_input("% of Alternatives", min_value=0.0, max_value=100.0, value=0.0, step=0.1)
     cpf_percentage = st.number_input("% of CPF or Retirement", min_value=0.0, max_value=100.0, value=0.0, step=0.1)
 
-
-with st.expander("Tweak Growth Rates for Each Asset Type"):
-    equities_growth_rate = st.number_input("Equities Growth Rate (%)", min_value=0.0, value=10.0, step=0.1)
-    fixed_income_growth_rate = st.number_input("Fixed Income Growth Rate (%)", min_value=0.0, value=4.0, step=0.1)
-    cash_growth_rate = st.number_input("Cash Growth Rate (%)", min_value=0.0, value=0.0, step=0.1)
-    cash_equivalents_growth_rate = st.number_input("Cash Equivalents Growth Rate (%)", min_value=0.0, value=2.0, step=0.1)
-    real_estate_growth_rate = st.number_input("Real Estate Growth Rate (%)", min_value=0.0, value=4.0, step=0.1)
-    cryptocurrency_growth_rate = st.number_input("Cryptocurrency Growth Rate (%)", min_value=0.0, value=15.0, step=0.1)
-    commodities_growth_rate = st.number_input("Commodities Growth Rate (%)", min_value=0.0, value=3.0, step=0.1)
-    reits_growth_rate = st.number_input("REITs Growth Rate (%)", min_value=0.0, value=6.0, step=0.1)
-    alternatives_growth_rate = st.number_input("Alternatives Growth Rate (%)", min_value=0.0, value=8.0, step=0.1)
-    cpf_growth_rate = st.number_input("CPF Growth Rate (%)", min_value=0.0, value=4.0, step=0.1)
+st.markdown("<h4 style='color: #F39373; padding-top: 20px; padding-bottom: 20px;'>Adjust Default Growth Rates for Each Asset Type</h4>", unsafe_allow_html=True)
+st.markdown("<p style='font-size: medium; font-style: italic;'>Adjust these growth rate estimates if you would like to use different assumptions</p>", unsafe_allow_html=True)
+with st.expander("Adjust Growth Rates for Each Asset Type"):
+    equities_growth_rate = st.slider("Equities Growth Rate (%)", min_value=0.0, max_value=100.0, value=10.0, step=0.1)
+    fixed_income_growth_rate = st.slider("Fixed Income Growth Rate (%)", min_value=0.0, max_value=100.0, value=4.0, step=0.1)
+    cash_growth_rate = st.slider("Cash Growth Rate (%)", min_value=0.0, max_value=100.0, value=0.0, step=0.1)
+    cash_equivalents_growth_rate = st.slider("Cash Equivalents Growth Rate (%)", min_value=0.0, max_value=100.0, value=2.0, step=0.1)
+    real_estate_growth_rate = st.slider("Real Estate Growth Rate (%)", min_value=0.0, max_value=100.0, value=4.0, step=0.1)
+    cryptocurrency_growth_rate = st.slider("Cryptocurrency Growth Rate (%)", min_value=0.0, max_value=100.0, value=15.0, step=0.1)
+    commodities_growth_rate = st.slider("Commodities Growth Rate (%)", min_value=0.0, max_value=100.0, value=3.0, step=0.1)
+    reits_growth_rate = st.slider("REITs Growth Rate (%)", min_value=0.0, max_value=100.0, value=6.0, step=0.1)
+    alternatives_growth_rate = st.slider("Alternatives Growth Rate (%)", min_value=0.0, max_value=100.0, value=8.0, step=0.1)
+    cpf_growth_rate = st.slider("CPF Growth Rate (%)", min_value=0.0, max_value=100.0, value=4.0, step=0.1)
 
 # Ensure the total percentage is 100%
 total_percentage = (
@@ -79,6 +87,7 @@ if total_percentage != 100.0:
 
 # Custom asset fields
 st.markdown("<h2 style='color: #F39373;'>Add Custom Assets</h2>", unsafe_allow_html=True)
+st.markdown("<p style='font-size: medium; font-style: italic;'>Add specific assets here for more granular assumptions. For instance, if you hold 10% of your portfolio in Apple stock. Or hold 5% of your portfolio in Solana.</p>", unsafe_allow_html=True)
 custom_assets = []
 
 # Display initial 3 custom asset fields
@@ -147,12 +156,13 @@ if total_allocation > 0:
 else:
     blended_annual_return = 0.0
 
-st.markdown(f"<h3 style='color: #F39373;'>Blended Annual Return on Investments: {blended_annual_return:.2f}%</h3>", unsafe_allow_html=True)
-
-
-st.markdown("<hr>", unsafe_allow_html=True)
-
-
+st.markdown("<div style='padding-top: 40px; width: 50%; margin: 0 auto;'></div>", unsafe_allow_html=True)
+st.markdown(f"""
+<div style='border: 2px solid gray; padding: 10px; border-radius: 5px; text-align: center; width: 50%; margin: 0 auto;'>
+    <h3 style='color: gray;'>Annual Return on Investments: {blended_annual_return:.2f}%</h3>
+</div>
+""", unsafe_allow_html=True)
+st.markdown("<hr style='border-color: #F39373;'>", unsafe_allow_html=True)
 # Function to calculate FIRE plan
 def calculate_fire_plan(age, desired_fire_age, annual_expenses, current_savings, annual_return, annual_income, savings_rate, inflation_rate):
     # Calculate FIRE number
@@ -189,14 +199,13 @@ def calculate_fire_plan(age, desired_fire_age, annual_expenses, current_savings,
         # Reset actual_savings_at_desired_fire_age to the correct value for printing
         actual_savings_at_desired_fire_age = current_savings_growth + annual_savings_growth
     
+
+    st.markdown("<h2 style='color: #F39373;'>Results</h2>", unsafe_allow_html=True)
+    
     # Prepare the scratchpad
     scratchpad = f"""
-    <scratchpad>
+    <scratchpad style='font-size: 18px;'>
     FIRE number: ${fire_number:,.2f}<br>
-    Real rate of return: {real_rate_of_return * 100:.2f}%<br>
-    Current savings growth: ${current_savings_growth:,.2f}<br>
-    Annual savings: ${annual_savings:,.2f}<br>
-    Annual savings growth: ${annual_savings_growth:,.2f}<br>
     Actual savings at desired FIRE age: ${actual_savings_at_desired_fire_age:,.2f}<br>
     </scratchpad>
     """
@@ -216,7 +225,6 @@ if actual_savings_at_desired_fire_age >= fire_number:
 else:
     gap = fire_number - actual_savings_at_desired_fire_age
     st.markdown(f"<h3 style='color: red;'>You currently have a gap of ${gap:,.2f} to reach your FIRE number.</h3>", unsafe_allow_html=True)
-
 
 if not can_retire:
     additional_years_needed = 0
@@ -275,10 +283,13 @@ combined_chart = alt.layer(actual_savings_chart, required_savings_chart).resolve
     y='shared'
 )
 
-# Display the chart in Streamlit
+# Display the chart in Streamlit with padding
+st.markdown("<div style='padding-top: 40px;'></div>", unsafe_allow_html=True)
 st.altair_chart(combined_chart, use_container_width=True)
 
 
+# Sensitivity Analysis Heading
+st.markdown("<h2 style='color: #F39373; padding-top: 20px;'>Sensitivity Analysis</h2>", unsafe_allow_html=True)
 
 # Create a DataFrame to store the savings at desired FIRE age for different savings rates
 savings_rates = list(range(10, 85, 5))
@@ -299,16 +310,15 @@ savings_at_fire_age_corrected = [
 ]
 
 savings_rate_data = {
-    'Savings Rate (%)': savings_rates,
-    'Savings at FIRE Age': savings_at_fire_age_corrected
+    'Savings Rate (%)': [f"{rate}%" for rate in savings_rates],
+    'Savings at FIRE Age': [f"${savings:,.0f}" for savings in savings_at_fire_age_corrected]
 }
 
 savings_rate_df = pd.DataFrame(savings_rate_data)
 
 # Display the table in Streamlit
-st.write("Savings at Desired FIRE Age for Different Savings Rates")
-st.dataframe(savings_rate_df, height=400)  # Set height to 400 to match the other table
-
+st.write("Savings Based on Savings Rate")
+st.dataframe(savings_rate_df.style.set_properties(**{'font-size': '14pt', 'text-align': 'left'}), height=400, width=600)  # Set width to 3/4 of 800
 
 # Create a range of annual returns from 3.0% to 12.0%, incrementing by 0.5%
 annual_return_rates = [round(x * 0.5, 1) for x in range(6, 25)]
@@ -322,12 +332,12 @@ inflation_rate = st.session_state.get('inflation_rate', 3.0)
 
 # Calculate the savings projections for each annual return rate
 for annual_return in annual_return_rates:
-    adjusted_annual_return = annual_return / 100 - inflation_rate / 100
-    current_savings_growth = current_savings * ((1 + adjusted_annual_return) ** (desired_fire_age - age))
+    adjusted_annual_return = annual_return - inflation_rate
+    current_savings_growth = current_savings * ((1 + adjusted_annual_return / 100) ** (desired_fire_age - age))
     
     # Avoid division by zero by checking if adjusted_annual_return is zero
     if adjusted_annual_return != 0:
-        annual_savings_growth = annual_savings * (((1 + adjusted_annual_return) ** (desired_fire_age - age) - 1) / adjusted_annual_return)
+        annual_savings_growth = annual_savings * (((1 + adjusted_annual_return / 100) ** (desired_fire_age - age) - 1) / (adjusted_annual_return / 100))
     else:
         annual_savings_growth = annual_savings * (desired_fire_age - age)  # Simple linear growth if return is zero
     
@@ -337,17 +347,14 @@ for annual_return in annual_return_rates:
 
 # Create a DataFrame to store the results
 sensitivity_data = {
-    'Annual Return Rate (%)': annual_return_rates,
-    'Savings at FIRE Age ($)': savings_at_fire_age
+    'Annual Return Rate (%)': [f"{rate:.1f}" for rate in annual_return_rates],  # Show 1 decimal place
+    'Savings at FIRE Age ($)': [f"${savings:,.0f}" for savings in savings_at_fire_age]  # Format with commas and $ sign
 }
-
 sensitivity_df = pd.DataFrame(sensitivity_data)
 
 # Display the table in Streamlit
-st.write("Savings Projection Sensitivity Table at Desired FIRE Age")
-st.dataframe(sensitivity_df, height=400)  # Set height to 400 to match the other table
-
-
+st.write("Savings Based on Annual Return Rate")
+st.dataframe(sensitivity_df.style.set_properties(**{'font-size': '14pt'}), height=400, width=600)  # Set width to 3/4 of 800
 # Provide suggestions based on risk tolerance
 st.markdown("### Suggestions Based on Risk Tolerance")
 
@@ -383,6 +390,10 @@ current_age = st.number_input("Current Age", min_value=0.0, value=32.0, step=0.1
 desired_fire_age = st.number_input("Desired FIRE Age", min_value=0.0, value=50.0, step=0.1, format="%.1f", key="desired_fire_age")
 current_savings = st.number_input("Current Savings ($)", min_value=0, value=1000000, step=1000, key="current_savings")
 annual_savings = st.number_input("Annual Savings ($)", min_value=0, value=30000, step=1000, key="annual_savings")
+
+# Add line breaks for better spacing
+st.markdown("<br><br>", unsafe_allow_html=True)
+
 
 # Monte Carlo simulation parameters
 num_trials = 1000
