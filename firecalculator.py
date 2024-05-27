@@ -254,8 +254,9 @@ required_savings_data = {
 required_savings_df = pd.DataFrame(required_savings_data)
 
 # Create the actual savings chart
+# Ensure the 'Age' field is treated as an ordinal scale to avoid gaps for odd-numbered years
 actual_savings_chart = alt.Chart(actual_savings_df).mark_line(color='blue').encode(
-    x='Age',
+    x=alt.X('Age:O', title='Age'),  # Treat 'Age' as an ordinal scale
     y=alt.Y('Savings', scale=alt.Scale(domain=[current_savings, max(actual_savings_df['Savings'].max(), required_savings_df['Savings'].max())]))
 ).properties(
     title='Actual Savings Trajectory'
@@ -263,7 +264,7 @@ actual_savings_chart = alt.Chart(actual_savings_df).mark_line(color='blue').enco
 
 # Create the required savings chart
 required_savings_chart = alt.Chart(required_savings_df).mark_line(color='red', strokeDash=[5, 5]).encode(
-    x='Age',
+    x=alt.X('Age:O', title='Age'),  # Treat 'Age' as an ordinal scale
     y='Savings'
 ).properties(
     title='Required Savings Trajectory to Reach FIRE Number'
@@ -406,10 +407,15 @@ with col2:
 st.markdown("<br><br>", unsafe_allow_html=True)
 
 
+
 # Monte Carlo simulation parameters
 num_trials = 1000
 years = int(desired_fire_age - current_age)
 inflation_rate = inflation_rate / 100
+
+# Print the number of years until desired FIRE age in Streamlit
+st.markdown(f"<h3 style='font-size: 18px;'>Years until desired FIRE age: {years}</h3>", unsafe_allow_html=True)
+
 
 # Run Monte Carlo simulation
 results = []
@@ -432,7 +438,8 @@ results = np.array(results)
 percentiles = np.percentile(results, [10, 50, 90], axis=0)
 
 # Create DataFrame for plotting
-years_range = list(range(int(current_age), int(desired_fire_age)))
+
+years_range = list(range(int(current_age) + 1, int(desired_fire_age) + 1))
 percentile_df = pd.DataFrame({
     'Year': years_range * 3,
     'Total Savings': np.concatenate([percentiles[0], percentiles[1], percentiles[2]]),
@@ -441,7 +448,7 @@ percentile_df = pd.DataFrame({
 
 # Plot the results using Altair
 chart = alt.Chart(percentile_df).mark_line().encode(
-    x=alt.X('Year', title='Year', scale=alt.Scale(domain=[int(current_age), int(desired_fire_age)])),
+    x=alt.X('Year', title='Year', scale=alt.Scale(domain=[int(current_age) + 1, int(desired_fire_age)])),
     y=alt.Y('Total Savings', title='Total Savings'),
     color=alt.Color('Percentile', legend=alt.Legend(orient='bottom'))
 ).properties(
@@ -451,7 +458,6 @@ chart = alt.Chart(percentile_df).mark_line().encode(
 )
 
 st.altair_chart(chart, use_container_width=True)
-
 
 # Display final savings percentiles at desired FIRE age
 st.markdown(f"<h3 style='font-size: 18px;'>Projected Savings at Age {desired_fire_age}</h3>", unsafe_allow_html=True)
