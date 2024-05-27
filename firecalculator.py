@@ -441,14 +441,15 @@ percentile_df = pd.DataFrame({
 
 # Plot the results using Altair
 chart = alt.Chart(percentile_df).mark_line().encode(
-    x='Year',
-    y='Total Savings',
-    color='Percentile'
+    x=alt.X('Year', title='Year', scale=alt.Scale(domain=[int(current_age), int(desired_fire_age)])),
+    y=alt.Y('Total Savings', title='Total Savings'),
+    color=alt.Color('Percentile', legend=alt.Legend(orient='bottom'))
 ).properties(
-    title='Monte Carlo Simulation of Retirement Savings'
+    title='Monte Carlo Simulation of Retirement Savings',
+    width=800,  # Increase the width of the chart
+    height=400  # Increase the height of the chart
 )
 
-# Display the chart in Streamlit with more horizontal space
 st.altair_chart(chart, use_container_width=True)
 
 
@@ -469,11 +470,3 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 
-
-
-# #Add in volatility estimates per asset class based on GPT & research, but give the users the options to adjust
-
-# #suggested for highly volatility but potentially high return assets they would see a huge range of outcomes
-# #for the assets that are more "stable" show their trajectory separate from the ones that are very volatile
-# #for the assets that are more "stable" show their trajectory separate from the ones that are very volatile
-# #for the assets that are more "stable" show their trajectory separate from the ones that are very volatile
