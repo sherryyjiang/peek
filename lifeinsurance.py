@@ -7,6 +7,17 @@ import matplotlib.pyplot as plt
 
 st.title("Do I Need Life Insurance?")
 
+st.markdown(
+    """
+    <div style="background-color: #f0f0f0; padding: 10px; border-radius: 5px;">
+        <p>This free calculator was built by <a href="https://www.linkedin.com/in/sherry-jiang-12557332/" target="_blank">Sherry</a> from the Peek team (<a href="https://peek.money" target="_blank">peek.money</a>). If you would like to leave any feedback, feel free to reach out to sherry@peek.money or on LinkedIn.</p>
+        <p>This calculator is designed to help you think about your life insurance coverage - death coverage vs. critical illness or other health insurance coverage like hospitalization. I initially wanted to answer this question for myself and found many of the resources online to be very convoluted or opaque around this topic. I built this for myself, which hopefully others can find useful as well!</p>
+        <p>There are a lot of directional assumptions used here. For greater precision, feel free to enter in exact policy numbers when you do research for your own personal situation. Nothing here is financial advice - please do your own research.</p>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
 
 st.markdown("### Insurance Premium Assumptions")
 
