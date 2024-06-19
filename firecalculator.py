@@ -150,7 +150,9 @@ else:
 
 st.markdown(f"""
 <div style='padding-top: 10px; text-align: left;'>
-    <h4 style='color: gray;'>Annual Return on Investments: {blended_annual_return:.2f}%</h4>
+    <h4 style='color: gray;'>Annual Return on Investments: {blended_annual_return:.2f}% 
+        <span style='cursor: pointer;' title='The return is calculated based on a blended average'>ℹ️</span>
+    </h4>
     <p style='font-size: 16px; color: gray;'>This calculation is based on expected annual return on investments. You can adjust the assumptions from the default values provided on the left side panel.</p>
 </div>
 """, unsafe_allow_html=True)
@@ -474,5 +476,3 @@ st.markdown(f"""
     <li>The 90th percentile outcome represents a more best-case scenario, where returns are higher than average.</li>
 </ul>
 """, unsafe_allow_html=True)
-
-
