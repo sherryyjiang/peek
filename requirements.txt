@@ -6,7 +6,4 @@ matplotlib
 seaborn
 yfinance
 openai
-os
-streamlit
-from dotenv import load_dotenv
-load_dotenv
+python-dotenv
