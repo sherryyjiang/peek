@@ -58,6 +58,7 @@ if dark_mode:
 ############################################################################################################################################################
 
 # Function to calculate portfolio metrics
+
 def calculate_portfolio_metrics(portfolio):
     total_return = 0
     total_std_dev = 0
@@ -88,48 +89,49 @@ st.title("Portfolio Rebalancing Simulator")
 
 st.subheader("Introduction")
 st.markdown("""
-<div style="border: 2px solid #c9d1d9; padding: 10px; border-radius: 5px; background-color: #f0f0f0;">
 The portfolio rebalancing simulator tool is designed to help users optimize their investment portfolios by experimenting with different allocation percentages. Users input basic information such as net worth, risk appetite, and age, which guide the tool's allocation suggestions. They also input their current portfolio, which focuses on liquid or public assets with prices pulled from Yahoo! Finance.
-<br><br>
+
 The tool provides key portfolio health metrics, including annualized return, standard deviation, and Sharpe ratio, calculated since 2015. Based on this data, users receive AI-generated suggestions to adjust their portfolio for either de-risking or enhancing growth. Additionally, users can add new items with varying weights to visualize how these changes affect overall portfolio health.
-<br><br>
-This allows for dynamic experimentation, helping users make informed decisions to achieve their desired financial outcomes. Remember, past perforance does not guarantee future results, but it could be used as an indicator. The information provided is for educational and informational purposes only and should not be construed as financial advice.
-<br><br>
-For any questions or feedback, don't hesitate to reach out to sherry@peek.money! This product was created by Sherry from the Peek team. If you like what you see, and want more of it, check out <a href="https://peek.money">peek.money</a>! Tools like this can be directly integrated with real-time information around your portfolio so you don't have to manually enter each time.
-</div>
-""", unsafe_allow_html=True)
+
+This allows for dynamic experimentation, helping users make informed decisions to achieve their desired financial outcomes. Remember, past performance does not guarantee future results, but it could be used as an indicator. The information provided is for educational and informational purposes only and should not be construed as financial advice.
+
+For any questions or feedback, don't hesitate to reach out to sherry@peek.money! This product was created by Sherry from the Peek team. If you like what you see, and want more of it, check out [peek.money](https://peek.money)! Tools like this can be directly integrated with real-time information around your portfolio so you don't have to manually enter each time.
+""")
 
 
 ############################################################################################################################################################
 
 # Basic Information
+
 st.header("Basic Information")
 
 col1, col2 = st.columns(2)
 
 with col1:
     st.subheader("Net Worth")
-    net_worth = st.number_input("Enter your estimated net worth:", min_value=0.0, step=1000.0, value=1000000.0)
+    net_worth = st.number_input("Enter your estimated net worth:", min_value=0.0, step=1000.0, value=500000.0)
 
     st.subheader("User Information")
-    age = st.number_input("Enter your age:", min_value=0, max_value=120, step=1, value=30)
+    age = st.number_input("Enter your age:", min_value=0, max_value=120, step=1, value=35)
 
 with col2:
     st.subheader("Risk Appetite")
     risk_appetite = st.selectbox(
         "Select your risk appetite:",
-        ("Conservative (tolerate 0-10% loss)", "Moderate (tolerate 10% to 20% loss)", "Aggressive (tolerate 20%+ loss)")
+        ("Conservative (tolerate 0-10% loss)", "Moderate (tolerate 10% to 20% loss)", "Aggressive (tolerate 20%+ loss)"),
+        index=1
     )
-
     st.subheader("Dependents")
     dependents = st.selectbox(
         "Do you have any dependents?",
-        ("Yes", "No")
+        ("Yes", "No"),
+        index=1
     )
 
 ############################################################################################################################################################
 
 # Input current portfolio
+
 st.header("Current Portfolio")
 
 st.markdown("""
@@ -140,6 +142,7 @@ Add in estimations for your current portfolio in liquid assets with tickers. To 
 ############################################################################################################################################################
 
 #OpenAI tickers suggestions
+
 def get_ticker_suggestions(portfolio_description):
     prompt = (
         f"Based on the following portfolio description, provide a list of public market positions with their tickers, separated by commas. If any names are not recognizable, let the user know that you could not find the relevant ticker in your database and ask them to try again:\n"
@@ -175,6 +178,12 @@ if st.button("Get Ticker"):
         st.write(f"Suggested Tickers: {tickers}")
     else:
         st.warning("Please provide the names of the assets in your portfolio.")
+
+def extract_tickers(text):
+    import re
+    # Regular expression to find all tickers (assuming tickers are uppercase letters and numbers)
+    tickers = re.findall(r'\b[A-Z]{1,5}\b', text)
+    return ', '.join(tickers)
 
 
 ############################################################################################################################################################
@@ -333,10 +342,10 @@ if total_row["% Holding"].iloc[0] == 100.0 and portfolio_df["New % Holding"].sum
     st.write(changes_df[["Stock Ticker", "% Holding", "New % Holding", "Change in % Holding", "Change in $ Amount"]])
 
 
-
 ############################################################################################################################################################
 
 # Function to assess and rebalance the portfolio
+
 def assess_and_rebalance_portfolio(portfolio_df, portfolio_annualized_return, portfolio_std_dev, risk_appetite, age, dependents):
     # Filter out assets with zero allocation
     non_zero_portfolio_df = portfolio_df[portfolio_df["% Holding"] != 0]
