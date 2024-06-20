@@ -101,6 +101,19 @@ For any questions or feedback, don't hesitate to reach out to sherry@peek.money!
 
 ############################################################################################################################################################
 
+def clean_data(value):
+    """Remove non-numeric characters except for the decimal point."""
+    if isinstance(value, str):
+        cleaned_value = ''.join(char for char in value if char.isdigit() or char == '.')
+        try:
+            return float(cleaned_value)
+        except ValueError:
+            return None
+    return value
+
+############################################################################################################################################################
+
+
 # Basic Information
 
 st.header("Basic Information")
@@ -264,8 +277,8 @@ for index, row in portfolio_df.iterrows():
         weight = row["% Holding"]
         if weight is not None:
             weight /= 100
-            annualized_return = float(row["Annualized Returns"])
-            std_dev = float(row["Standard Deviation"])
+            annualized_return = clean_data(row["Annualized Returns"])
+            std_dev = clean_data(row["Standard Deviation"])
             portfolio_returns.append(weight * annualized_return)
             portfolio_std_devs.append((weight * std_dev) ** 2)
 
