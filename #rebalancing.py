@@ -296,6 +296,19 @@ if total_row["% Holding"].iloc[0] == 100.0:
     st.write(f"Initial Portfolio Annualized Return: {portfolio_annualized_return:.2f}%")
     st.write(f"Initial Portfolio Standard Deviation: {portfolio_std_dev:.2f}%")
 
+# Display expected range of outcomes based on return and standard deviation
+if total_row["% Holding"].iloc[0] == 100.0:
+    st.subheader("Expected Range of Outcomes")
+
+    # Calculate the expected range of outcomes
+    mean_return = portfolio_annualized_return / 100
+    std_dev = portfolio_std_dev / 100
+
+    # Assuming a normal distribution, calculate the range for 1, 2, and 3 standard deviations
+    one_std_dev_range = (mean_return - std_dev, mean_return + std_dev)
+
+    st.write(f"1 Standard Deviation Range: {one_std_dev_range[0] * 100:.2f}% to {one_std_dev_range[1] * 100:.2f}%")
+    st.write(f"{one_std_dev_range[0] * 100:.2f}% is the amount that you could expect to lose in a bad year.")
 
 ############################################################################################################################################################
 
@@ -311,8 +324,8 @@ if portfolio_df["New % Holding"].sum() == 100.0:
             new_weight = row["New % Holding"]
             if new_weight is not None:
                 new_weight /= 100
-                annualized_return = float(row["Annualized Returns"])
-                std_dev = float(row["Standard Deviation"])
+                annualized_return = clean_data(row["Annualized Returns"])
+                std_dev = clean_data(row["Standard Deviation"])
                 new_portfolio_returns.append(new_weight * annualized_return)
                 new_portfolio_std_devs.append((new_weight * std_dev) ** 2)
 
@@ -327,15 +340,31 @@ if portfolio_df["New % Holding"].sum() == 100.0:
     st.write(f"New Portfolio Annualized Return: {new_portfolio_annualized_return:.2f}%")
     st.write(f"New Portfolio Standard Deviation: {new_portfolio_std_dev:.2f}%")
 
-
 else:
     if portfolio_df["New % Holding"].notna().sum() > 0:
         st.warning("The total New % Holding must add up to 100% to proceed with rebalancing.")
+
+# Display expected range of outcomes based on return and standard deviation for the rebalanced portfolio
+if portfolio_df["New % Holding"].sum() == 100.0:
+    st.subheader("Expected Range of Outcomes for Rebalanced Portfolio")
+
+    # Calculate the expected range of outcomes
+    new_mean_return = new_portfolio_annualized_return / 100
+    new_std_dev = new_portfolio_std_dev / 100
+
+    # Assuming a normal distribution, calculate the range for 1 standard deviation
+    new_one_std_dev_range = (new_mean_return - new_std_dev, new_mean_return + new_std_dev)
+
+    st.write(f"1 Standard Deviation Range: {new_one_std_dev_range[0] * 100:.2f}% to {new_one_std_dev_range[1] * 100:.2f}%")
+    st.write(f"{new_one_std_dev_range[0] * 100:.2f}% is the amount that you could expect to lose in a bad year.")
+
 
 
 ############################################################################################################################################################
 
 #Rebalancing Charts
+
+st.subheader("Differences in Initial and Rebalanced Portfolio")
 
 
 # Calculate the difference in annualized return and standard deviation between the initial and the new portfolio
