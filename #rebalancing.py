@@ -6,7 +6,6 @@ import pandas as pd
 import openai
 import os
 import streamlit as st
-import instructor
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
