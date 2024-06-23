@@ -6,6 +6,8 @@ import pandas as pd
 import openai
 import os
 import streamlit as st
+import instructor
+from pydantic import BaseModel
 from dotenv import load_dotenv
 
 from openai import OpenAI
@@ -154,12 +156,15 @@ Add in estimations for your current portfolio in liquid assets with tickers. To 
 
 ############################################################################################################################################################
 
+
+
 #OpenAI tickers suggestions
 
 def get_ticker_suggestions(portfolio_description):
     prompt = (
-        f"Based on the following portfolio description, provide a list of public market positions with their tickers, separated by commas. If any names are not recognizable, let the user know that you could not find the relevant ticker in your database and ask them to try again:\n"
-        f"{portfolio_description}\n"
+        f"Only return the tickers based on the following portfolio description:\n"
+        f"{portfolio_description}\n\n"
+        "Format: TICKER1, TICKER2, TICKER3, ..."
     )
     
     try:
@@ -168,7 +173,7 @@ def get_ticker_suggestions(portfolio_description):
                 {
                     "role": "system",
                     "content": (
-                        "You are a financial analyst. Your task is to list out the tickers for the users easily based on the description of their investments"
+                        "You are a financial analyst. Your task is to list out the tickers for the users easily based on the description of their investments. Only provide the tickers, separated by commas."
                     )
                 },
                 {"role": "user", "content": prompt}
@@ -178,25 +183,26 @@ def get_ticker_suggestions(portfolio_description):
             max_tokens=1000
         )
         suggestions = chat_completion.choices[0].message.content
-        return suggestions
+        return suggestions.strip()
     except Exception as e:
         return f"An error occurred while fetching the LLM suggestions: {e}"
 
 st.subheader("Step 1: Get Ticker - AI widget")
-portfolio_description = st.text_area("Enter your public market positions if you can't remember the tickers. Separate each entry by a comma:")
+portfolio_description = st.text_area("Enter your public market positions if you can't remember the tickers. Separate each entry by a comma. Only valid tickers will show up:")
+
+# Use session state to persist the output
+if "tickers" not in st.session_state:
+    st.session_state.tickers = ""
 
 if st.button("Get Ticker"):
     if portfolio_description:
-        tickers = get_ticker_suggestions(portfolio_description)
-        st.write(f"Suggested Tickers: {tickers}")
+        st.session_state.tickers = get_ticker_suggestions(portfolio_description)
     else:
         st.warning("Please provide the names of the assets in your portfolio.")
 
-def extract_tickers(text):
-    import re
-    # Regular expression to find all tickers (assuming tickers are uppercase letters and numbers)
-    tickers = re.findall(r'\b[A-Z]{1,5}\b', text)
-    return ', '.join(tickers)
+if st.session_state.tickers:
+    st.write(f"Suggested Tickers: {st.session_state.tickers}")
+
 
 
 ############################################################################################################################################################
@@ -259,7 +265,8 @@ for index, row in portfolio_df.iterrows():
         portfolio_df.at[index, "Standard Deviation"] = str(std_dev)[12:20]
 
 # Check if the total % Holding is exactly 100%
-if total_row["% Holding"].iloc[0] == 100.0:
+if total_row["% Holding"].iloc[0] == 100.0 and portfolio_df["New % Holding"].sum() != 100.0:
+    # st.success("See your initial portfolio review below")
     # Create a new DataFrame with the required columns
     initial_portfolio_df = portfolio_df[["Stock Ticker", "% Holding", "New % Holding", "Annualized Returns", "Standard Deviation"]]
     
@@ -267,6 +274,14 @@ if total_row["% Holding"].iloc[0] == 100.0:
     st.write("Output - Portfolio Allocation, Annualized Return and Standard Deviation")
     st.dataframe(initial_portfolio_df)
 
+
+if portfolio_df["New % Holding"].sum() == 100.0:
+    st.success("See your rebalanced portfolio review below")
+    initial_portfolio_df = portfolio_df[["Stock Ticker", "% Holding", "New % Holding", "Annualized Returns", "Standard Deviation"]]
+    
+    # Display the new DataFrame as a table
+    st.write("Output - Portfolio Allocation, Annualized Return and Standard Deviation")
+    st.dataframe(initial_portfolio_df)
 
 # Calculate portfolio level annualized returns and standard deviation
 portfolio_returns = []
@@ -334,6 +349,7 @@ if portfolio_df["New % Holding"].sum() == 100.0:
 
     # Calculate portfolio standard deviation for new portfolio
     new_portfolio_std_dev = np.sqrt(sum(new_portfolio_std_devs))
+
 
     # Display new portfolio level annualized returns and standard deviation
     st.subheader("Rebalanced Portfolio Review")
@@ -404,6 +420,7 @@ def assess_and_rebalance_portfolio(portfolio_df, portfolio_annualized_return, po
         f"Step 2: Recommendation\n"
         f"For instance, only recommend having more bonds of more than 10% if the user is older, has low risk appetite and has dependents. "
         f"For someone who is younger, risk-taking and has no dependents, a more equity-weighted portfolio is okay.\n"
+        f"If the user is aggressive in their risk appetite, feel free to recommend them a much higher return higher standard deviation portfolio mix.\n"
         f"If the user is weighted more towards a certain sector, you can suggest for the user to diversify into ETFs in other sectors.\n\n"
         f"Step 3: Tell the user they could add in the recommended new allocations in the New % Holdings column in the table below \n"
     )
@@ -419,7 +436,8 @@ def assess_and_rebalance_portfolio(portfolio_df, portfolio_annualized_return, po
                         "stated risk appetite, age, dependents, and provide an analysis and specific recommendations for adjustments. Your response should "
                         "include an assessment of asset allocation risk, concentration risk, and detailed suggestions for reducing exposure "
                         "to certain holdings. Additionally, you will recommend new assets to add to the portfolio, with exact percentages "
-                        "for the new % holdings. If the user wants another suggested portfolio, inform them they can run the process again."
+                        "for the new % holdings. Ensure that the percentages for % holdings and new % holdings are whole numbers. Provide the revised allocations in a table format so the user can easily copy and paste the table "
+                        "Let the user know if they could copy/paste the table into the portfolio table above. If the user wants another suggested portfolio, inform them they can run the process again."
                     )
                 },
                 {"role": "user", "content": prompt}
