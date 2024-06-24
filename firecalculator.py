@@ -282,10 +282,25 @@ st.markdown("<div style='padding-top: 40px;'></div>", unsafe_allow_html=True)
 st.altair_chart(combined_chart, use_container_width=True)
 
 
+# Calculate the age at which the user would reach their FIRE number
+def calculate_fire_age(current_savings, annual_savings, real_rate_of_return, fire_number):
+    age = 0
+    while current_savings < fire_number:
+        current_savings = current_savings * (1 + real_rate_of_return) + annual_savings
+        age += 1
+    return age
+
+# Calculate the age to reach FIRE number
+fire_age = calculate_fire_age(current_savings, annual_savings, real_rate_of_return, fire_number)
+
+# Print the age to reach FIRE number
+st.markdown(f"<h3 style='color: #F39373;'>You will reach your FIRE number at age: {int(age) + fire_age}</h3>", unsafe_allow_html=True)
+
+
 # Sensitivity Analysis Heading
 st.markdown("<h2 style='color: #F39373; padding-top: 20px;'>What If Scenarios</h2>", unsafe_allow_html=True)
 st.markdown("""
-    <p style='color: #000000; font-size: 16px;'>
+    <p style='color: #FFFFFF; font-size: 16px;'>
         The charts below show how your savings at your desired FIRE age changes with different savings rate % and different annual return rates. 
         They are meant to help you figure out what potential adjustments you could make.
     </p>
