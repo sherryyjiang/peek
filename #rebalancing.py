@@ -92,7 +92,7 @@ st.subheader("Introduction")
 st.markdown("""
 The portfolio rebalancing simulator tool is designed to help users optimize their investment portfolios by experimenting with different allocation percentages. Users input basic information such as net worth, risk appetite, and age, which guide the tool's allocation suggestions. They also input their current portfolio, which focuses on liquid or public assets with prices pulled from Yahoo! Finance.
 
-The tool provides key portfolio health metrics, including annualized return, standard deviation, and Sharpe ratio, calculated since 2015. Based on this data, users receive AI-generated suggestions to adjust their portfolio for either de-risking or enhancing growth. Additionally, users can add new items with varying weights to visualize how these changes affect overall portfolio health.
+The tool provides key portfolio health metrics, including annualized return and standard deviation calculated since 2015. Based on this data, users receive AI-generated suggestions to adjust their portfolio for either de-risking or enhancing growth. Additionally, users can add new items with varying weights to visualize how these changes affect overall portfolio health.
 
 This allows for dynamic experimentation, helping users make informed decisions to achieve their desired financial outcomes. Remember, past performance does not guarantee future results, but it could be used as an indicator. The information provided is for educational and informational purposes only and should not be construed as financial advice.
 
