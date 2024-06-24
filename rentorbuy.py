@@ -117,7 +117,7 @@ else:
     with col3:
         stay_duration = int(st.number_input("Stay Duration (years)", value=30, key="stay_duration", format="%d", help="Enter the stay duration in years"))
     with col4:
-        mortgage_rate = st.number_input("Mortgage Rate (%)", value=4.0, key="mortgage_rate", format="%.1f", help="Enter the mortgage rate in percentage", step=0.1) / 100
+        mortgage_rate = st.number_input("Mortgage Rate (%)", value=4.0, key="mortgage_rate", format="%.1f", help="Enter the mortgage rate in percentage", step=0.1, min_value=0.1) / 100
     
     col5, col6 = st.columns(2)
     with col5:
@@ -127,7 +127,7 @@ else:
 
 # Constants
 with st.expander("Adjust Other Default Assumptions", expanded=False):
-    investment_return = st.slider('Investment Return (%)', 0.0, 20.0, 9.0) / 100
+    investment_return = st.slider('Investment Return (%)', 0.1, 20.0, 9.0) / 100
     home_price_growth_rate = st.slider('Home Price Growth Rate (%)', 0.0, 10.0, 4.0) / 100
     rental_growth_rate = st.slider('Rental Growth Rate (%)', 0.0, 10.0, 3.0) / 100
     cost_of_buying = st.slider('Cost of Buying (%)', 0.0, 10.0, 4.5) / 100
