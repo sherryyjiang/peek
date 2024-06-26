@@ -251,8 +251,7 @@ if not can_retire:
     while actual_savings_at_desired_fire_age < fire_number and additional_years_needed < max_additional_years:
         additional_years_needed += 1
         actual_savings_at_desired_fire_age += annual_savings * (1 + real_rate_of_return) ** additional_years_needed
-        if savings_rate > 0:
-            print(f"Additional Years Needed: {additional_years_needed}, Actual Savings: {actual_savings_at_desired_fire_age}")
+        print(f"Additional Years Needed: {additional_years_needed}, Actual Savings: {actual_savings_at_desired_fire_age}")
     fire_age = age + additional_years_needed
     # if additional_years_needed >= max_additional_years:
     #     st.warning("The number of additional years needed exceeded the maximum limit. The calculation might not be accurate.")
