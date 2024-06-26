@@ -1,5 +1,9 @@
 # Imports
 import streamlit as st
+import logging
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
 
 # Heading
 st.markdown("<h1 style='color: #F39373; padding-bottom: 30px;'>🔥 FIRE (Financial Independence, Retire Early) Calculator</h1>", unsafe_allow_html=True)
@@ -157,6 +161,9 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 st.markdown("<hr>", unsafe_allow_html=True)
+
+
+
 def calculate_fire_plan(age, desired_fire_age, annual_expenses, current_savings, annual_return, annual_income, savings_rate, inflation_rate):
     # Calculate FIRE number
     fire_number = 25 * annual_expenses
@@ -168,11 +175,11 @@ def calculate_fire_plan(age, desired_fire_age, annual_expenses, current_savings,
     n = desired_fire_age - age
     try:
         current_savings_growth = current_savings * (1 + real_rate_of_return) ** n
-        print(f"Current Savings Growth: {current_savings_growth}")
+        logging.info(f"Current Savings Growth: {current_savings_growth}")
     except OverflowError:
         current_savings_growth = float('inf')
         st.error("Current savings growth calculation overflowed. Please check the input values.")
-        print("OverflowError: Current savings growth calculation overflowed.")
+        logging.error("OverflowError: Current savings growth calculation overflowed.")
     
     # Calculate annual savings amount
     annual_savings = annual_income * (savings_rate / 100)
@@ -183,15 +190,15 @@ def calculate_fire_plan(age, desired_fire_age, annual_expenses, current_savings,
             annual_savings_growth = annual_savings * (((1 + real_rate_of_return) ** n - 1) / real_rate_of_return)
         else:
             annual_savings_growth = annual_savings * n
-        print(f"Annual Savings Growth: {annual_savings_growth}")
+        logging.info(f"Annual Savings Growth: {annual_savings_growth}")
     except OverflowError:
         annual_savings_growth = float('inf')
         st.error("Annual savings growth calculation overflowed. Please check the input values.")
-        print("OverflowError: Annual savings growth calculation overflowed.")
+        logging.error("OverflowError: Annual savings growth calculation overflowed.")
     
     # Calculate actual savings at desired FIRE age
     actual_savings_at_desired_fire_age = current_savings_growth + annual_savings_growth
-    print(f"Actual Savings at Desired FIRE Age: {actual_savings_at_desired_fire_age}")
+    logging.info(f"Actual Savings at Desired FIRE Age: {actual_savings_at_desired_fire_age}")
     
     # Compare actual savings to FIRE number
     if actual_savings_at_desired_fire_age >= fire_number:
@@ -208,14 +215,14 @@ def calculate_fire_plan(age, desired_fire_age, annual_expenses, current_savings,
             additional_years_needed += 1
             try:
                 actual_savings_at_desired_fire_age += annual_savings * (1 + real_rate_of_return) ** additional_years_needed
-                print(f"Additional Years Needed: {additional_years_needed}, Actual Savings: {actual_savings_at_desired_fire_age}")
+                logging.info(f"Additional Years Needed: {additional_years_needed}, Actual Savings: {actual_savings_at_desired_fire_age}")
             except OverflowError:
                 actual_savings_at_desired_fire_age = float('inf')
                 st.error("Additional years needed calculation overflowed. Please check the input values.")
-                print("OverflowError: Additional years needed calculation overflowed.")
+                logging.error("OverflowError: Additional years needed calculation overflowed.")
                 break
         if additional_years_needed >= max_additional_years:
-            st.warning("You currently have negative savings, which means you are spending more than you are earning. This will make it difficult for you to reach your FIRE goal.\nWarning: The What If Scenarios and Monte Carlo simulations only work in the case of positive savings.")
+            st.warning("The number of additional years needed exceeded the maximum limit. The calculation might not be accurate.")
         # Reset actual_savings_at_desired_fire_age to the correct value for printing
         actual_savings_at_desired_fire_age = current_savings_growth + annual_savings_growth
     
@@ -251,8 +258,11 @@ if not can_retire:
     while actual_savings_at_desired_fire_age < fire_number and additional_years_needed < max_additional_years:
         additional_years_needed += 1
         actual_savings_at_desired_fire_age += annual_savings * (1 + real_rate_of_return) ** additional_years_needed
-        print(f"Additional Years Needed: {additional_years_needed}, Actual Savings: {actual_savings_at_desired_fire_age}")
+        logging.info(f"Additional Years Needed: {additional_years_needed}, Actual Savings: {actual_savings_at_desired_fire_age}")
     fire_age = age + additional_years_needed
+    if additional_years_needed >= max_additional_years:
+        st.warning("The number of additional years needed exceeded the maximum limit. The calculation might not be accurate.")
+    
     # if additional_years_needed >= max_additional_years:
     #     st.warning("The number of additional years needed exceeded the maximum limit. The calculation might not be accurate.")
 
