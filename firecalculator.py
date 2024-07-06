@@ -34,12 +34,12 @@ st.markdown("""
 st.markdown("<h2 style='color: #F39373; padding-bottom: 40px;'>Basic Inputs</h2>", unsafe_allow_html=True)
 col1, col2 = st.columns(2)
 with col1:
-    age = st.number_input("Current Age", min_value=0.0, value=35.0, step=0.1, format="%.1f")
+    age = st.number_input("Current Age", min_value=0, value=35, step=1)
     annual_expenses = st.number_input("Annual Expenses at Retirement ($)", min_value=0, value=80000, step=1000)
     current_savings = st.number_input("Current Savings ($)", min_value=0, value=500000, step=1000)
     annual_income = st.number_input("Annual Income ($) - assumed 3% growth rate", min_value=0, value=80000, step=1000)
 with col2:
-    desired_fire_age = st.number_input("Desired FIRE Age", min_value=0.0, value=55.0, step=0.1, format="%.1f")
+    desired_fire_age = st.number_input("Desired FIRE Age", min_value=0, value=55, step=1)
     savings_rate = st.number_input("Savings Rate (%)", min_value=-100.0, value=40.0, step=0.1)
     inflation_rate = st.number_input("Inflation Rate (%)", min_value=0.0, value=3.0, step=0.1)
     
@@ -470,8 +470,8 @@ num_trials = 1000
 years = int(desired_fire_age - current_age)
 inflation_rate = inflation_rate / 100
 
-# Print the number of years until desired FIRE age in Streamlit
-st.markdown(f"<h3 style='font-size: 18px;'>Years until desired FIRE age: {years}</h3>", unsafe_allow_html=True)
+# # Print the number of years until desired FIRE age in Streamlit
+# st.markdown(f"<h3 style='font-size: 18px;'>Years until desired FIRE age: {years}</h3>", unsafe_allow_html=True)
 
 
 # Run Monte Carlo simulation
