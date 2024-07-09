@@ -52,8 +52,8 @@ st.markdown("<br>", unsafe_allow_html=True)
 
 
 
-etf1 = st.text_input('Enter the first ETF ticker:')
-etf2 = st.text_input('Enter the second ETF ticker:')
+etf1 = st.text_input('Enter the first ETF ticker:').upper()
+etf2 = st.text_input('Enter the second ETF ticker:').upper()
 
 if etf1 and etf2:
     with st.spinner('Fetching ETF data...'):
