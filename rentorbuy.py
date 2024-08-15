@@ -5,6 +5,7 @@ import numpy as np  # Added this line
 import pandas as pd
 import altair as alt
 
+from utils.currencies import get_currency_list, get_currency_symbol
 
 #Heading
 st.markdown("<h1 style='color: #F39373; padding-bottom: 30px;'>🏠 Rent vs. Buy Calculator</h1>", unsafe_allow_html=True)
@@ -127,6 +128,7 @@ else:
 
 # Constants
 with st.expander("Adjust Other Default Assumptions", expanded=False):
+    currency = st.selectbox("Currency", get_currency_list(), help="Select the currency for the calculations")
     investment_return = st.slider('Investment Return (%)', 0.1, 20.0, 9.0) / 100
     home_price_growth_rate = st.slider('Home Price Growth Rate (%)', 0.0, 10.0, 4.0) / 100
     rental_growth_rate = st.slider('Rental Growth Rate (%)', 0.0, 10.0, 3.0) / 100
@@ -148,17 +150,19 @@ After uploading or manually entering your details, feel free to tap each of the 
 st.markdown("<div style='padding-bottom: 30px;'></div>", unsafe_allow_html=True)
 
 if st.button("Calculate Decision"):
+    currency_symbol = get_currency_symbol(currency)
+
     results = calculate_rent_vs_buy(home_price, monthly_rent, stay_duration, mortgage_rate, down_payment, mortgage_term, investment_return, home_price_growth_rate, rental_growth_rate, cost_of_buying, cost_of_selling, maintenance_cost)
     total_renting_cost, total_buying_cost, initial_rent_cost, initial_buy_cost, annual_future_value_rent, annual_future_value_buy_recurring, net_proceeds, annual_mortgage_payment, annual_maintenance_cost, annual_recurring_rent, total_recurring_rent, annual_recurring_buy, total_recurring_buy, future_value_buy_initial = results
-    
-    st.write(f"<p style='color: #646464;'><b>Total Renting Cost: ${total_renting_cost:,.2f}</b></p>", unsafe_allow_html=True)
-    st.write(f"<p style='color: #646464;'><b>Total Buying Cost: ${total_buying_cost:,.2f}</b></p>", unsafe_allow_html=True)
+
+    st.write(f"<p style='color: #646464;'><b>Total Renting Cost: {currency_symbol}{total_renting_cost:,.2f}</b></p>", unsafe_allow_html=True)
+    st.write(f"<p style='color: #646464;'><b>Total Buying Cost: {currency_symbol}{total_buying_cost:,.2f}</b></p>", unsafe_allow_html=True)
 
     
     if total_renting_cost < total_buying_cost:
         savings = total_buying_cost - total_renting_cost
         st.write("<p style='color: #F39373; font-size: 18px;'><b>Renting is more cost-effective than buying.</b></p>", unsafe_allow_html=True)
-        st.write(f"<p style='color: #F39373; font-size: 18px;'><b>You would save ${savings:,.2f} by renting.</b></p>", unsafe_allow_html=True)
+        st.write(f"<p style='color: #F39373; font-size: 18px;'><b>You would save {currency_symbol}{savings:,.2f} by renting.</b></p>", unsafe_allow_html=True)
     else:
         savings = total_renting_cost - total_buying_cost
         st.write("<p style='color: #F39373; font-size: 18px;'><b>Buying is more cost-effective than renting.</b></p>", unsafe_allow_html=True)
@@ -169,15 +173,15 @@ if st.button("Calculate Decision"):
     
 
     st.markdown("<h4 style='color: #646464; padding-bottom: 20px;'>Breakdown of Total Renting Cost</h4>", unsafe_allow_html=True)
-    st.write(f"<p style='color: #646464;'><b>Initial Renting Cost: ${initial_rent_cost:,.2f}</b></p>", unsafe_allow_html=True)
-    st.write(f"<p style='color: #646464;'><b>Recurring Renting Cost: ${total_recurring_rent:,.2f}</b></p>", unsafe_allow_html=True)
-    st.write(f"<p style='color: #646464;'><b>Renting Opportunity Cost: ${annual_future_value_rent * stay_duration:,.2f}</b></p>", unsafe_allow_html=True)
+    st.write(f"<p style='color: #646464;'><b>Initial Renting Cost: {currency_symbol}{initial_rent_cost:,.2f}</b></p>", unsafe_allow_html=True)
+    st.write(f"<p style='color: #646464;'><b>Recurring Renting Cost: {currency_symbol}{total_recurring_rent:,.2f}</b></p>", unsafe_allow_html=True)
+    st.write(f"<p style='color: #646464;'><b>Renting Opportunity Cost: {currency_symbol}{annual_future_value_rent * stay_duration:,.2f}</b></p>", unsafe_allow_html=True)
 
     st.markdown("<h4 style='color: #646464; padding-bottom: 20px;'>Breakdown of Total Buying Cost</h4>", unsafe_allow_html=True)
-    st.write(f"<p style='color: #646464;'><b>Initial Buying Cost: ${initial_buy_cost:,.2f}</b></p>", unsafe_allow_html=True)
-    st.write(f"<p style='color: #646464;'><b>Recurring Buying Cost: ${total_recurring_buy:,.2f}</b></p>", unsafe_allow_html=True)
-    st.write(f"<p style='color: #646464;'><b>Buying Opportunity Cost: ${(future_value_buy_initial + annual_future_value_buy_recurring * stay_duration):,.2f}</b></p>", unsafe_allow_html=True)
-    st.write(f"<p style='color: #646464; padding-bottom: 40px;'><b>Buying Net Proceeds: ${net_proceeds * (-1):,.2f}</b> <i>(This is the amount you get when you sell the house at the end of {stay_duration} years, which you subtract out of the total cost for buying)</i></p>", unsafe_allow_html=True)
+    st.write(f"<p style='color: #646464;'><b>Initial Buying Cost: {currency_symbol}{initial_buy_cost:,.2f}</b></p>", unsafe_allow_html=True)
+    st.write(f"<p style='color: #646464;'><b>Recurring Buying Cost: {currency_symbol}{total_recurring_buy:,.2f}</b></p>", unsafe_allow_html=True)
+    st.write(f"<p style='color: #646464;'><b>Buying Opportunity Cost: {currency_symbol}{(future_value_buy_initial + annual_future_value_buy_recurring * stay_duration):,.2f}</b></p>", unsafe_allow_html=True)
+    st.write(f"<p style='color: #646464; padding-bottom: 40px;'><b>Buying Net Proceeds: {currency_symbol}{net_proceeds * (-1):,.2f}</b> <i>(This is the amount you get when you sell the house at the end of {stay_duration} years, which you subtract out of the total cost for buying)</i></p>", unsafe_allow_html=True)
 
     # Line chart for annualized costs over time
     years = list(range(1, stay_duration + 1))
@@ -207,12 +211,12 @@ if st.button("Calculate Decision"):
     # Create the line plot using Altair
     line_chart = alt.Chart(data_melted).mark_line(point=True).encode(
         x=alt.X('Year:Q', title='Years'),
-        y=alt.Y('Cost:Q', title='Annualized Cost ($)'),
+        y=alt.Y('Cost:Q', title=f'Annualized Cost ({currency_symbol})'),
         color='Cost Type:N',
         tooltip=['Year:Q', 'Cost:Q', 'Cost Type:N']
     ).properties(
         title=alt.TitleParams(
-            text='Annualized Rent vs. Buy Costs Over Time',
+            text=f'Annualized Rent vs. Buy Costs Over Time in {currency}',
             fontSize=20,  # h3 size
             anchor='start'
         ),
@@ -225,7 +229,7 @@ if st.button("Calculate Decision"):
     text_labels = alt.Chart(data_melted).mark_text(align='right', dx=-5, dy=-5).encode(
         x='Year:Q',
         y='Cost:Q',
-        text=alt.Text('Cost:Q', format='$,.0f'),
+        text=alt.Text('Cost:Q', format='.0f'),
         color='Cost Type:N'
     ).transform_filter(
         (alt.datum.Year % 5 == 0) | (alt.datum.Year == stay_duration)
@@ -268,19 +272,21 @@ if st.button("Mortgage Rate - Breakeven"):
     st.write(f"<p style='color: #646464;'><b>Break-even Mortgage Rate: {break_even_rate:.2f}%</b></p>", unsafe_allow_html=True)
     st.write("That means you break even on your buying and renting cost at this mortgage rate.")
     st.write(f"Your current mortgage rate is {mortgage_rate*100:.2f}%")
+
     rates, renting_costs, buying_costs = calculate_costs_over_mortgage_rates(home_price, monthly_rent, stay_duration, mortgage_rate, down_payment, mortgage_term, investment_return, home_price_growth_rate, rental_growth_rate, cost_of_buying, cost_of_selling, maintenance_cost)  # Pass all arguments here
-    
+    currency_symbol = get_currency_symbol(currency)
+
     data = pd.DataFrame({
         'Mortgage Rate (%)': rates * 100,  # Convert to percentage and update column name for clarity
-        'Renting Cost ($)': renting_costs,  # Update column name for clarity
-        'Buying Cost ($)': buying_costs  # Update column name for clarity
-    }).melt('Mortgage Rate (%)', var_name='Cost Type', value_name='Total Cost ($)')  # Update parameters to match column name changes
+        f'Renting Cost ({currency_symbol})': renting_costs,  # Update column name for clarity
+        f'Buying Cost ({currency_symbol})': buying_costs  # Update column name for clarity
+    }).melt('Mortgage Rate (%)', var_name='Cost Type', value_name=f'Total Cost ({currency_symbol})')  # Update parameters to match column name changes
     
     break_even_chart = alt.Chart(data).mark_line(point=True).encode(
         x=alt.X('Mortgage Rate (%):Q', title='Mortgage Rate (%)'),  # Ensure axis title matches updated column name
-        y=alt.Y('Total Cost ($):Q', title='Total Cost ($)'),  # Ensure axis title matches updated column name
+        y=alt.Y(f'Total Cost ({currency_symbol}):Q', title=f'Total Cost ({currency_symbol})'),  # Ensure axis title matches updated column name
         color=alt.Color('Cost Type:N', legend=alt.Legend(title="Cost Type")),  # Add legend title for clarity
-        tooltip=['Mortgage Rate (%):Q', 'Total Cost ($):Q', 'Cost Type:N']  # Ensure tooltip labels match updated column names
+        tooltip=['Mortgage Rate (%):Q', 'Total Cost ({currency_symbol}):Q', 'Cost Type:N']  # Ensure tooltip labels match updated column names
     ).properties(
         title='Renting vs. Buying Costs Over Different Mortgage Rates',
         width=600,
