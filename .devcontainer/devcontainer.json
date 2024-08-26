@@ -18,9 +18,9 @@
       ]
     }
   },
-  "updateContentCommand": "[ -f packages.txt ] && sudo apt update && sudo apt upgrade -y && sudo xargs apt install -y <packages.txt; [ -f requirements.txt ] && pip3 install --user -r requirements.txt; pip3 install --user streamlit; echo '✅ Packages installed and Requirements met'",
+  "updateContentCommand": "[ -f packages.txt ] && sudo apt update && sudo apt upgrade -y && sudo xargs apt install -y <packages.txt; [ -f requirements.txt ] && pip3 install --user -r requirements.txt; pip3 install --user streamlit; echo '✅ Packages installed and Requirements met' && mkdir -p ~/.streamlit && cp streamlit_credentials.toml ~/.streamlit/credentials.toml",
   "postAttachCommand": {
-    "server": "streamlit run lifeinsurance.py --server.enableCORS false --server.enableXsrfProtection false"
+    "server": "streamlit run lifeinsurance.py --server.enableCORS false --server.enableXsrfProtection false --server.headless true"
   },
   "portsAttributes": {
     "8501": {
