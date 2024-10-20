@@ -1,12 +1,13 @@
 # #rebalancing
 
+# from pydantic import BaseModel
+# import openai
+# import os
+
 import yfinance as yf
 import numpy as np
 import pandas as pd
-import openai
-import os
 import streamlit as st
-from pydantic import BaseModel
 from dotenv import load_dotenv
 
 from openai import OpenAI
@@ -22,32 +23,23 @@ dark_mode = st.checkbox("Enable Dark Mode")
 
 # Apply dark mode settings if enabled
 if dark_mode:
-    st.markdown(
+   st.markdown(
         """
         <style>
-        .css-18e3th9 {
+        body {
             background-color: #0e1117;
             color: #c9d1d9;
         }
-        .css-1d391kg {
+        .stApp {
             background-color: #0e1117;
         }
-        .css-1cpxqw2 {
+        h1, h2, h3, h4, h5, h6, p, div, span, label {
             color: #c9d1d9;
         }
-        .css-1v3fvcr {
-            color: #c9d1d9;
-        }
-        .css-1v0mbdj {
-            color: #c9d1d9;
-        }
-        .css-1aehpvj {
-            color: #c9d1d9;
-        }
-        .css-1cpxqw2 a {
+        a {
             color: #58a6ff;
         }
-        .css-1cpxqw2 a:hover {
+        a:hover {
             color: #1f6feb;
         }
         </style>
@@ -59,31 +51,31 @@ if dark_mode:
 ############################################################################################################################################################
 
 # Function to calculate portfolio metrics
+# NOT used
+# def calculate_portfolio_metrics(portfolio):
+#     total_return = 0
+#     total_std_dev = 0
+#     total_weight = 0
+#
+#     for asset, weight in portfolio.items():
+#         if asset in available_assets:
+#             data = yf.download(asset, start="2015-01-01", end="2024-01-01")['Adj Close']
+#             annual_returns = data.resample('YE').ffill().pct_change().dropna()
+#             geometric_return = (np.prod(1 + annual_returns) ** (1 / len(annual_returns)) - 1) * 100
+#             variance = np.var(annual_returns, ddof=1)
+#             std_dev_annual_return = np.sqrt(variance) * 100
+#         else:
+#             geometric_return = 10
+#             std_dev_annual_return = 10
+#         total_return += geometric_return * weight
+#         total_std_dev += std_dev_annual_return * weight
+#         total_weight += weight
+#     if total_weight == 0:
+#         return 0, 0, 0  # Avoid division by zero if total_weight is zero
+#
+#     sharpe_ratio = (total_return - 5) / total_std_dev if total_std_dev != 0 else 0
+#     return total_return, total_std_dev, sharpe_ratio
 
-def calculate_portfolio_metrics(portfolio):
-    total_return = 0
-    total_std_dev = 0
-    total_weight = 0
-
-    for asset, weight in portfolio.items():
-        if asset in available_assets:
-            data = yf.download(asset, start="2015-01-01", end="2024-01-01")['Adj Close']
-            annual_returns = data.resample('YE').ffill().pct_change().dropna()
-            geometric_return = (np.prod(1 + annual_returns) ** (1 / len(annual_returns)) - 1) * 100
-            variance = np.var(annual_returns, ddof=1)
-            std_dev_annual_return = np.sqrt(variance) * 100
-        else:
-            geometric_return = 10
-            std_dev_annual_return = 10
-        total_return += geometric_return * weight
-        total_std_dev += std_dev_annual_return * weight
-        total_weight += weight
-    
-    if total_weight == 0:
-        return 0, 0, 0  # Avoid division by zero if total_weight is zero
-    
-    sharpe_ratio = (total_return - 5) / total_std_dev if total_std_dev != 0 else 0
-    return total_return, total_std_dev, sharpe_ratio
 
 # Streamlit app
 st.title("Portfolio Rebalancing Simulator")
@@ -177,7 +169,7 @@ def get_ticker_suggestions(portfolio_description):
                 },
                 {"role": "user", "content": prompt}
             ],
-            model="gpt-4-turbo",
+            model="gpt-4o",
             temperature=0.5,
             max_tokens=1000
         )
@@ -185,6 +177,7 @@ def get_ticker_suggestions(portfolio_description):
         return suggestions.strip()
     except Exception as e:
         return f"An error occurred while fetching the LLM suggestions: {e}"
+
 
 st.subheader("Step 1: Get Ticker - AI widget")
 portfolio_description = st.text_area("Enter your public market positions if you can't remember the tickers. Separate each entry by a comma. Only valid tickers will show up:")
@@ -208,22 +201,58 @@ if st.session_state.tickers:
 
 #Portfolio Table
 
-st.subheader("Step 2: Add Your Current Portfolio")
-
-st.markdown("""
-Add in your current holdings and their respective % of your portfolio first in column 1 and 2. Leave "New % Holdings" blank for now until you know what % allocations you want to rebalance to.
-<br><br>
-""", unsafe_allow_html=True)
-
 # Create an empty DataFrame with the specified columns
 portfolio_df = pd.DataFrame(columns=["Stock Ticker", "% Holding", "New % Holding", "Annualized Returns", "Standard Deviation"])
 
-# Display the DataFrame as an editable table
-portfolio_df = st.data_editor(portfolio_df, num_rows="dynamic", column_config={
-    "% Holding": st.column_config.NumberColumn(format="%.2f"),
-    "New % Holding": st.column_config.NumberColumn(format="%.2f")
-})
 
+st.subheader("Step 2: Add Your Current Portfolio")
+st.markdown("""
+You can either enter your portfolio manually or upload an Excel file containing your current holdings.
+If uploading a file, it should have columns for "Stock Ticker" and "% Holding". Leave "New % Holdings" blank for now until you know what % allocations you want to rebalance to.
+<br><br>
+""", unsafe_allow_html=True)
+
+input_method = st.radio("Choose input method:", ("Manual Entry", "File Upload"))
+
+if input_method == "Manual Entry":
+    # Display the DataFrame as an editable table
+    portfolio_df = st.data_editor(portfolio_df, num_rows="dynamic", column_config={
+        "% Holding": st.column_config.NumberColumn(format="%.2f"),
+        "New % Holding": st.column_config.NumberColumn(format="%.2f")
+    })
+else:
+    # Allow user to upload an Excel file
+    uploaded_file = st.file_uploader("Choose an Excel file", type=["csv"])
+
+    if uploaded_file is not None:
+        # Read the CSV file into a DataFrame
+        portfolio_df = pd.read_csv(uploaded_file)
+        
+        # Ensure the required columns are present
+        required_columns = ["Stock Ticker", "% Holding"]
+        if not all(col in portfolio_df.columns for col in required_columns):
+            st.error("The CSV file must contain 'Stock Ticker' and '% Holding' columns.")
+        else:
+            # Check and add missing columns if they don't exist or are empty
+            new_columns = {
+                "New % Holding": pd.Series(dtype='float64'),
+                "Annualized Returns": pd.Series(dtype='float64'),
+                "Standard Deviation": pd.Series(dtype='float64')
+            }
+            for col, series in new_columns.items():
+                if col not in portfolio_df.columns or portfolio_df[col].empty:
+                    portfolio_df[col] = series
+            
+            # Display the DataFrame as an editable table
+            portfolio_df = st.data_editor(portfolio_df, num_rows="dynamic", column_config={
+                "% Holding": st.column_config.NumberColumn(format="%.2f"),
+                "New % Holding": st.column_config.NumberColumn(format="%.2f")
+            })
+    else:
+        st.info("Please upload a CSV file or switch to manual entry to proceed.")
+
+# Convert % Holding to float
+portfolio_df['% Holding'] = portfolio_df['% Holding'].astype(float)
 
 # Calculate the total for % Holding and New % Holding columns
 total_row = pd.DataFrame(portfolio_df[["% Holding", "New % Holding"]].sum()).transpose()
@@ -232,26 +261,66 @@ total_row["Annualized Returns"] = ""
 total_row["Standard Deviation"] = ""
 total_row["Notes"] = ""
 
+total_row_holding = round(total_row["% Holding"].iloc[0])
+total_row_new_holding = round(portfolio_df["New % Holding"]).sum()
+
 # Check if the total % Holding is less than 100%
-if total_row["% Holding"].iloc[0] < 100.0:
+if total_row_holding < 100.0:
     st.warning("The total percentage of your current holdings is less than 100%. Please ensure your portfolio allocations sum up to 100%.")
 
 # Check if the total % Holding is more than 100%
-if total_row["% Holding"].iloc[0] > 100.0:
+if total_row_holding > 100.0:
     st.warning("The total percentage of your current holdings is more than 100%. Please ensure your portfolio allocations sum up to 100%.")
 
 
 def fetch_annualized_return_and_std(ticker):
     try:
-        data = yf.download(ticker, start="2015-01-01", end="2024-01-01")
-        data['Return'] = data['Open'].pct_change()
-        annual_returns = data.resample('YE').ffill().pct_change().dropna()
-        annualized_return = round((np.prod(1 + annual_returns) ** (1 / len(annual_returns)) - 1) * 100, 2)
-        variance = np.var(annual_returns, ddof=1)
-        std_dev = round(np.sqrt(variance) * 100, 2)
+
+        today = pd.Timestamp.today().strftime('%Y-%m-%d')
+        data = yf.download(ticker, start="2015-01-01", end=today)
+
+        # Use 'Adj Close' as a Series for accurate return calculations
+        data = data['Adj Close']
+
+        # Check for NaN values in the data
+        if data.isna().all() or data.empty:  # If all data is NaN or empty, return defaults
+            print(f"Data for {ticker} is unavailable or contains NaN values.")
+            return 10.00, 10.00
+
+        # Resample to get the last 'Adj Close' price of each year
+        annual_prices = data.resample('YE').last()
+
+        # Check if the resampled data has any NaN or is empty
+        if annual_prices.isna().all() or annual_prices.empty:  # If all resampled data is NaN
+            print(f"Resampled data for {ticker} contains NaN values or is empty.")
+            return 10.00, 10.00
+
+        # Calculate annual returns
+        annual_returns = annual_prices.pct_change().dropna()
+
+        # If there are no valid annual returns, return defaults
+        if annual_returns.empty:
+            print(f"No valid annual returns for {ticker}.")
+            return 10.00, 10.00
+
+        # Compute the cumulative return
+        cumulative_return = (1 + annual_returns).prod()
+        num_years = len(annual_returns)
+
+        # Calculate annualized return
+        annualized_return = round((cumulative_return ** (1 / num_years) - 1) * 100, 2)
+
+        if num_years == 1:
+            # Cannot calculate std_dev with only one year, so return a default value
+            # print(f"Only one year of data available for {ticker}. Returning default std_dev of 10.00%.")
+            return annualized_return, 10.00
+
+        # Calculate standard deviation of annual returns
+        std_dev = round(annual_returns.std(ddof=1) * 100, 2)
         return annualized_return, std_dev
-    except Exception as e:
-        st.warning(f"Could not fetch data for {ticker}. Using defaults of 10.00% return and 10.00% standard deviation.")
+
+    except Exception:
+        # print(f"An error occurred: {e}")
         return 10.00, 10.00
 
 
@@ -260,11 +329,11 @@ for index, row in portfolio_df.iterrows():
     ticker = row["Stock Ticker"]
     if ticker:
         annualized_return, std_dev = fetch_annualized_return_and_std(ticker)
-        portfolio_df.at[index, "Annualized Returns"] = str(annualized_return)[12:19]
-        portfolio_df.at[index, "Standard Deviation"] = str(std_dev)[12:20]
+        portfolio_df.at[index, "Annualized Returns"] = annualized_return
+        portfolio_df.at[index, "Standard Deviation"] = std_dev
 
 # Check if the total % Holding is exactly 100%
-if total_row["% Holding"].iloc[0] == 100.0 and portfolio_df["New % Holding"].sum() != 100.0:
+if total_row_holding == 100.0 and total_row_new_holding != 100.0:
     # st.success("See your initial portfolio review below")
     # Create a new DataFrame with the required columns
     initial_portfolio_df = portfolio_df[["Stock Ticker", "% Holding", "New % Holding", "Annualized Returns", "Standard Deviation"]]
@@ -273,8 +342,7 @@ if total_row["% Holding"].iloc[0] == 100.0 and portfolio_df["New % Holding"].sum
     st.write("Output - Portfolio Allocation, Annualized Return and Standard Deviation")
     st.dataframe(initial_portfolio_df)
 
-
-if portfolio_df["New % Holding"].sum() == 100.0:
+if total_row_new_holding == 100.0:
     st.success("See your rebalanced portfolio review below")
     initial_portfolio_df = portfolio_df[["Stock Ticker", "% Holding", "New % Holding", "Annualized Returns", "Standard Deviation"]]
     
@@ -306,12 +374,11 @@ st.subheader("Initial Portfolio Review")
 
 
 # Display portfolio level annualized returns and standard deviation only if % holdings add up to 100%
-if total_row["% Holding"].iloc[0] == 100.0:
+if total_row_holding == 100.0:
     st.write(f"Initial Portfolio Annualized Return: {portfolio_annualized_return:.2f}%")
     st.write(f"Initial Portfolio Standard Deviation: {portfolio_std_dev:.2f}%")
 
-# Display expected range of outcomes based on return and standard deviation
-if total_row["% Holding"].iloc[0] == 100.0:
+    # Display expected range of outcomes based on return and standard deviation
     st.subheader("Expected Range of Outcomes")
 
     # Calculate the expected range of outcomes
@@ -329,7 +396,7 @@ if total_row["% Holding"].iloc[0] == 100.0:
 #Rebalancing Action
 
 # Check if the total New % Holding is exactly 100%
-if portfolio_df["New % Holding"].sum() == 100.0:
+if total_row_new_holding == 100.0:
     new_portfolio_returns = []
     new_portfolio_std_devs = []
 
@@ -349,55 +416,46 @@ if portfolio_df["New % Holding"].sum() == 100.0:
     # Calculate portfolio standard deviation for new portfolio
     new_portfolio_std_dev = np.sqrt(sum(new_portfolio_std_devs))
 
-
     # Display new portfolio level annualized returns and standard deviation
     st.subheader("Rebalanced Portfolio Review")
     st.write(f"New Portfolio Annualized Return: {new_portfolio_annualized_return:.2f}%")
     st.write(f"New Portfolio Standard Deviation: {new_portfolio_std_dev:.2f}%")
 
+    # Display expected range of outcomes based on return and standard deviation for the rebalanced portfolio
+
+    if new_portfolio_annualized_return and new_portfolio_std_dev:
+        st.subheader("Expected Range of Outcomes for Rebalanced Portfolio")
+        # Calculate the expected range of outcomes
+        new_mean_return = new_portfolio_annualized_return / 100
+        new_std_dev = new_portfolio_std_dev / 100
+
+        # Assuming a normal distribution, calculate the range for 1 standard deviation
+        new_one_std_dev_range = (new_mean_return - new_std_dev, new_mean_return + new_std_dev)
+
+        st.write(f"1 Standard Deviation Range: {new_one_std_dev_range[0] * 100:.2f}% to {new_one_std_dev_range[1] * 100:.2f}%")
+        st.write(f"{new_one_std_dev_range[0] * 100:.2f}% is the amount that you could expect to lose in a bad year.")
+
+    #Rebalancing Charts
+    # Calculate the difference in annualized return and standard deviation between the initial and the new portfolio
+
+    if total_row_holding == 100.0:
+        st.subheader("Differences in Initial and Rebalanced Portfolio")
+        return_difference = new_portfolio_annualized_return - portfolio_annualized_return
+        std_dev_difference = new_portfolio_std_dev - portfolio_std_dev
+
+        st.write(f"Difference in Annualized Return: {return_difference:.2f}%")
+        st.write(f"Difference in Standard Deviation: {std_dev_difference:.2f}%")
+
+        # Show changes between % holdings and % new holdings
+        st.subheader("Changes in Holdings")
+        changes_df = portfolio_df.copy()
+        changes_df["Change in % Holding"] = changes_df["New % Holding"] - changes_df["% Holding"]
+        changes_df["Change in $ Amount"] = (changes_df["Change in % Holding"] / 100) * net_worth
+        st.write(changes_df[["Stock Ticker", "% Holding", "New % Holding", "Change in % Holding", "Change in $ Amount"]])
+
 else:
     if portfolio_df["New % Holding"].notna().sum() > 0:
         st.warning("The total New % Holding must add up to 100% to proceed with rebalancing.")
-
-# Display expected range of outcomes based on return and standard deviation for the rebalanced portfolio
-if portfolio_df["New % Holding"].sum() == 100.0:
-    st.subheader("Expected Range of Outcomes for Rebalanced Portfolio")
-
-    # Calculate the expected range of outcomes
-    new_mean_return = new_portfolio_annualized_return / 100
-    new_std_dev = new_portfolio_std_dev / 100
-
-    # Assuming a normal distribution, calculate the range for 1 standard deviation
-    new_one_std_dev_range = (new_mean_return - new_std_dev, new_mean_return + new_std_dev)
-
-    st.write(f"1 Standard Deviation Range: {new_one_std_dev_range[0] * 100:.2f}% to {new_one_std_dev_range[1] * 100:.2f}%")
-    st.write(f"{new_one_std_dev_range[0] * 100:.2f}% is the amount that you could expect to lose in a bad year.")
-
-
-
-############################################################################################################################################################
-
-#Rebalancing Charts
-
-st.subheader("Differences in Initial and Rebalanced Portfolio")
-
-
-# Calculate the difference in annualized return and standard deviation between the initial and the new portfolio
-if total_row["% Holding"].iloc[0] == 100.0 and portfolio_df["New % Holding"].sum() == 100.0:
-    return_difference = new_portfolio_annualized_return - portfolio_annualized_return
-    std_dev_difference = new_portfolio_std_dev - portfolio_std_dev
-
-    st.write(f"Difference in Annualized Return: {return_difference:.2f}%")
-    st.write(f"Difference in Standard Deviation: {std_dev_difference:.2f}%")
-
-# Show changes between % holdings and % new holdings
-if total_row["% Holding"].iloc[0] == 100.0 and portfolio_df["New % Holding"].sum() == 100.0:
-    st.subheader("Changes in Holdings")
-    changes_df = portfolio_df.copy()
-    changes_df["Change in % Holding"] = changes_df["New % Holding"] - changes_df["% Holding"]
-    changes_df["Change in $ Amount"] = (changes_df["Change in % Holding"] / 100) * net_worth
-    st.write(changes_df[["Stock Ticker", "% Holding", "New % Holding", "Change in % Holding", "Change in $ Amount"]])
-
 
 ############################################################################################################################################################
 
@@ -423,7 +481,7 @@ def assess_and_rebalance_portfolio(portfolio_df, portfolio_annualized_return, po
         f"If the user is weighted more towards a certain sector, you can suggest for the user to diversify into ETFs in other sectors.\n\n"
         f"Step 3: Tell the user they could add in the recommended new allocations in the New % Holdings column in the table below \n"
     )
-    
+
     try:
         chat_completion = client.chat.completions.create(
             messages=[
@@ -441,7 +499,7 @@ def assess_and_rebalance_portfolio(portfolio_df, portfolio_annualized_return, po
                 },
                 {"role": "user", "content": prompt}
             ],
-            model="gpt-4-turbo",
+            model="gpt-4o",
             temperature=0.7,
             max_tokens=1000
         )
